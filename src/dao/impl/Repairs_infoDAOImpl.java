@@ -1,0 +1,138 @@
+package dao.impl;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+
+import vo.Repairs_info;
+
+
+
+
+import com.google.gson.Gson;
+import com.mchange.v2.c3p0.impl.NewProxyPreparedStatement;
+
+import dao.IRepairs_infoDAO;
+
+public class Repairs_infoDAOImpl implements IRepairs_infoDAO {
+	private Connection conn = null; // 定义数据库的连接对象
+	private NewProxyPreparedStatement pstmt = null; // 定义数据库操作对象
+	private Gson gson=new Gson();//gson工具对象
+	
+	public Repairs_infoDAOImpl(Connection conn) { // 构造方法，设置数据库连接
+		this.conn = conn;
+	}
+	
+	//查看报修全部数据
+	/* (non-Javadoc)
+	 * @see dao.impl.Repairs_infoDAO#selectall()
+	 */
+	public String selectall()
+	{
+		ArrayList<Repairs_info>selectall_arrayList=new ArrayList<Repairs_info>();
+		
+		try {
+			String sql = "select * from repairs_info";
+			this.pstmt = (NewProxyPreparedStatement) this.conn
+					.prepareStatement(sql);
+			ResultSet resultSet = this.pstmt.executeQuery();
+
+			while (resultSet.next()) {
+				Repairs_info repairs_info=new Repairs_info();
+				repairs_info.setId(resultSet.getInt("id"));
+				repairs_info.setStu_id(resultSet.getString("stu_id"));
+				repairs_info.setStu_name(resultSet.getString("stu_name"));
+				repairs_info.setDormitory_num(resultSet.getString("dormitory_num"));
+				repairs_info.setPhone_number(resultSet.getString("phone_number"));
+				repairs_info.setReport_datetime(resultSet.getDate("report_datetime"));
+				repairs_info.setReason(resultSet.getString("reason"));
+				
+				selectall_arrayList.add(repairs_info);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return this.gson.toJson(selectall_arrayList);
+	}
+	
+
+	// 删除报修的一条记录
+	/* (non-Javadoc)
+	 * @see dao.impl.Repairs_infoDAO#delete(java.lang.Integer)
+	 */
+	public boolean delete(Integer id) throws Exception {
+		boolean flag = false;
+		
+		try {
+			String sql = "delete from repairs_info where id=?";
+
+			this.pstmt = (NewProxyPreparedStatement) this.conn
+					.prepareStatement(sql);
+			this.pstmt.setInt(1, id);
+
+			if (this.pstmt.executeUpdate() > 0) {
+				flag = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flag;
+	}
+	
+	// 插入报修的一条记录
+		/* (non-Javadoc)
+		 * @see dao.impl.Repairs_infoDAO#insert(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Date, java.lang.String)
+		 */
+		public boolean insert(String stu_id,String stu_name,String dormitory_num,String phone_number,Date report_datetime,String reason) throws Exception {
+			boolean flag = false;
+			try {
+				String sql = "insert into repairs_info(stu_id,stu_name,dormitory_num,phone_number,report_datetime,reason)values(?,?,?,?,?,?)";
+				this.pstmt = (NewProxyPreparedStatement) this.conn
+						.prepareStatement(sql);
+				this.pstmt.setString(1, stu_id);
+				this.pstmt.setString(2, stu_name);
+				this.pstmt.setString(3, dormitory_num);
+				this.pstmt.setString(4, phone_number);
+				this.pstmt.setDate(5, report_datetime);
+				this.pstmt.setString(6, reason);
+				
+
+				if (this.pstmt.executeUpdate() > 0) {
+					flag = true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return flag;
+		}
+		
+		// 更新报修的一条记录
+		/* (non-Javadoc)
+		 * @see dao.impl.Repairs_infoDAO#update(java.lang.Integer, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Date, java.lang.String)
+		 */
+		public boolean update(Integer id,String stu_id,String stu_name,String dormitory_num,String phone_number,Date report_datetime,String reason)
+				throws Exception {
+			boolean flag = false;
+			try {
+				String sql = "update repairs_info set stu_id=?,stu_name=?,dormitory_num=?,phone_number=?,report_datetime=?,reason=? where id=?";
+
+				this.pstmt = (NewProxyPreparedStatement) this.conn
+						.prepareStatement(sql);
+				this.pstmt.setString(1, stu_id);
+				this.pstmt.setString(2, stu_name);
+				this.pstmt.setString(3, dormitory_num);
+				this.pstmt.setString(4, phone_number);
+				this.pstmt.setDate(5, report_datetime);
+				this.pstmt.setString(6, reason);
+				this.pstmt.setInt(7, id);
+
+				if (this.pstmt.executeUpdate() > 0) {
+					flag = true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return flag;
+		}
+}

@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<link href="../style/bootstrap.css" rel="stylesheet">
+		<link href="../style/site.css" rel="stylesheet">
+		<link href="../style/bootstrap-responsive.css" rel="stylesheet">
+		<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+		<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="util.js"></script>
+		<!--6个文件-->
+		<title>宿舍管理系统</title>
+		<style>
+			.fakeimg {
+				height: 200px;
+				background: #aaa;
+			}
+		</style>
+
+		<script>
+			function getCookie(cookie_name) {
+				var allcookies = document.cookie;
+				var cookie_pos = allcookies.indexOf(cookie_name); //索引的长度
+
+				// 如果找到了索引，就代表cookie存在，
+				// 反之，就说明不存在。
+				if(cookie_pos != -1) {
+					// 把cookie_pos放在值的开始，只要给值加1即可。
+					cookie_pos += cookie_name.length + 1; //这里容易出问题，所以请大家参考的时候自己好好研究一下
+					var cookie_end = allcookies.indexOf(";", cookie_pos);
+
+					if(cookie_end == -1) {
+						cookie_end = allcookies.length;
+					}
+
+					var value = unescape(allcookies.substring(cookie_pos, cookie_end)); //这里就可以得到你想要的cookie的值了。。。
+				}
+				return value;
+			}
+
+			$(function() {　　
+				if(getCookie('safe') != 'true') {
+					window.location.href = './login.html';
+				}
+				if(getCookie('identity') != 'admin') {
+					window.location.href = './dormitory_student.html';
+				}
+			});
+		</script>
+		<script>
+			//			学生信息查询
+			function selectstudentall() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/student",
+					async: true,
+					data: {
+						"way": "all"
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#student_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" + "<td>" + result[i].password + "</td>" +
+								"<td>" + result[i].birthday + "</td>" + "<td>" + result[i].major + "</td>" + "<td>" + result[i].grade + "</td>" + "</tr>");
+							$('#student_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+			//条件查询学生信息
+			function selectstudentsingle() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/student",
+					async: true,
+					data: {
+						"way": "single",
+						"classname": $('#student-classname option:selected').val(),
+						"major": $('#student-major option:selected').val(),
+						"grade": $('#student-grade option:selected').val()
+
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#student_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" + "<td>" + result[i].password + "</td>" +
+								"<td>" + result[i].birthday + "</td>" + "<td>" + result[i].major + "</td>" + "<td>" + result[i].grade + "</td>" + "</tr>");
+							$('#student_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+
+			}
+
+			//条件查询快件信息
+			function selectexpresssingle() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/express",
+					async: true,
+					data: {
+						"way": "single",
+						"classname": $('#express-classname option:selected').val(),
+						"major": $('#express-major option:selected').val(),
+						"grade": $('#express-grade option:selected').val()
+
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#express_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							if(result[i].is_get == "1") {
+								result[i].is_get = "已送达";
+							} else {
+								result[i].is_get = "未送达";
+							}
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" +
+								"<td>" + result[i].phone_number + "</td>" + "<td>" + result[i].arrival_datetime + "</td>" + "<td>" + result[i].is_get + "</td>" + "<td>" + "<button onclick='singleselectexpress(" + result[i].id + ")' >更新该条快件信息</button>" + "</td>" + "<td>" + "<button onclick='deleteexpress(" + result[i].id + ")' >删除该条快件信息</button>" + "</td>" + "</tr>");
+							$('#express_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+
+			}
+
+			//		快件信息查询
+			function selectexpressall() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/express",
+					async: true,
+					data: {
+						"way": "all"
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#express_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							if(result[i].is_get == "1") {
+								result[i].is_get = "已送达";
+							} else {
+								result[i].is_get = "未送达";
+							}
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" +
+								"<td>" + result[i].phone_number + "</td>" + "<td>" + result[i].arrival_datetime + "</td>" + "<td>" + result[i].is_get + "</td>" + "<td>" + "<button onclick='singleselectexpress(" + result[i].id + ")' >更新该条快件信息</button>" + "</td>"+ "<td>" + "<button onclick='deleteexpress(" + result[i].id + ")' >删除该条快件信息</button>" + "</td>" + "</tr>");
+							$('#express_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+//			按学生名模糊查询快件信息
+			function selectexpressbyname()
+			{
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/express", //url
+					async: true,
+					data: {
+						"way": "byname",
+						"name": $("#selectexpress-name").val()
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#express_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" +
+								"<td>" + result[i].phone_number + "</td>" + "<td>" + result[i].arrival_datetime + "</td>" + "<td>" + result[i].is_get + "</td>" + "<td>" + "<button onclick='singleselectexpress(" + result[i].id + ")' >更新该条快件信息</button>" + "</td>"+ "<td>" + "<button onclick='deleteexpress(" + result[i].id + ")' >删除该条快件信息</button>" + "</td>" + "</tr>");
+							$('#express_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+
+			
+			//		报修信息查询
+			function selectrepairsall() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/repairs",
+					async: true,
+					data: {
+						"way": "all"
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#repairs_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" +
+								"<td>" + result[i].dormitory_num + "</td>" + "<td>" + result[i].phone_number + "</td>" + "<td>" + result[i].report_datetime + "</td>" + "<td>" + result[i].reason + "</td>" + "</tr>");
+							$('#repairs_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+
+			//		晚归信息查询
+			function selectnightall() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/night",
+					async: true,
+					data: {
+						"way": "all"
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#night_back_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" +
+								"<td>" + result[i].night_back_datetime + "</td>" + "</tr>");
+							$('#night_back_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+
+			//		返校信息查询
+			function selectcomeall() {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/come",
+					async: true,
+					data: {
+						"way": "all"
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#come_back_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							if(result[i].situation == "1") {
+								result[i].situation = "已返校";
+							} else {
+								result[i].situation = "已离校";
+							}
+							temp += ("<tr>" + "<td>" + result[i].id + "</td>" + "<td>" + result[i].stu_id + "</td>" + "<td>" + result[i].stu_name + "</td>" + "<td>" + result[i].situation + "</td>" +
+								"<td>" + result[i].come_back_datetime + "</td>" + "</tr>");
+							$('#come_back_info-table tbody').append(temp);
+
+						}
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+
+			//		检查插入信息表单
+			function formcheck(formname) {
+				for(var i = 0; i < document.getElementById(formname).elements.length - 1; i++) {
+					if(document.getElementById(formname).elements[i].value == "") {
+						alert("当前表单不能有空项");
+						document.getElementById(formname).elements[i].focus();
+						return false;
+					}
+				}
+				return true;
+
+			}
+
+			//		插入快件信息
+			function insertexpress() {
+				if(!formcheck('insert-express_info-form')) {
+					return;
+				}
+				$.ajax({
+					type: "POST", //方法类型
+					dataType: "text", //预期服务器返回的数据类型
+					url: "/Dormitory/iexpress", //url
+					data: $('#insert-express_info-form').serialize(),
+					success: function(result) {
+						alert(result);
+						document.getElementById('insert-express_info-form').reset();
+					},
+					error: function() {
+						alert("非法输入！");
+						document.getElementById('insert-express_info-form').reset();
+					}
+				});
+			}
+
+			//插入夜归信息
+			function insertnight() {
+				if(!formcheck('insert-night_back_info-form')) {
+					return;
+				}
+				$.ajax({
+					type: "POST", //方法类型
+					dataType: "text", //预期服务器返回的数据类型
+					url: "/Dormitory/inight", //url
+					data: $('#insert-night_back_info-form').serialize(),
+					success: function(result) {
+						alert(result);
+						document.getElementById('insert-night_back_info-form').reset();
+					},
+					error: function() {
+						alert("非法输入！");
+						document.getElementById('insert-night_back_info-form').reset();
+					}
+				});
+			}
+
+			//插入报修信息
+			function insertrepairs() {
+				if(!formcheck('insert-repairs_info-form')) {
+					return;
+				}
+				$.ajax({
+					type: "POST", //方法类型
+					dataType: "text", //预期服务器返回的数据类型
+					url: "/Dormitory/irepairs", //url
+					data: $('#insert-repairs_info-form').serialize(),
+					success: function(result) {
+						alert(result);
+						document.getElementById('insert-repairs_info-form').reset();
+					},
+					error: function() {
+						alert("非法输入！");
+						document.getElementById('insert-repairs_info-form').reset();
+					}
+				});
+			}
+
+			//更改密码
+			function change_password() {
+				if($('#firstpassword').val() == $('#secondpassword').val()) {
+					$.ajax({
+						type: "POST", //方法类型
+						dataType: "text", //预期服务器返回的数据类型
+						url: "/Dormitory/cp", //url
+						data: {
+							"firstpassword": $('#firstpassword').val(),
+							"originpassword": $('#originpassword').val(),
+							"target": getCookie('identity'),
+							"login_id": getCookie('login_id')
+						},
+						success: function(result) {
+							alert(result);
+							document.getElementById('change_password-form').reset();
+						},
+						error: function() {
+							alert("非法输入！");
+							document.getElementById('change_password-form').reset();
+						}
+					});
+				} else {
+					alert("两次输入的新密码不一致");
+					return;
+				}
+			}
+
+			//		快件信息修改
+			function singleselectexpress(id) {
+				$.ajax({
+					type: "post",
+					url: "/Dormitory/express", //url
+					async: true,
+					data: {
+						"way": "byid",
+						"id": id
+					},
+					dataType: "json",
+					success: function(result) {
+						$("#express_info-table tbody").html("");
+						for(var i in result) {
+							temp = "";
+							temp += ("<tr><form id='update-express-form'>" +
+								"<td><input type='text' value=\"" + result[i].id + "\" id='update-id' disabled='true'/></td>" +
+								"<td><input type='text' value=\"" + result[i].stu_id + "\" id='update-stu_id' disabled='true'/></td>" +
+								"<td><input type='text' value=\"" + result[i].stu_name + "\" id='update-stu_name' disabled='true'/></td>" +
+								"<td><input type='text' value=\"" + result[i].phone_number + "\" id='update-phone_number'/></td>" +
+								"<td><input type='date' value=\"" + result[i].arrival_datetime + "\" id='update-arrival_datetime'/></td></form>" +
+								"<td><input type='text' value=\"" + result[i].is_get + "\" id='update-is_get'/></td></form>" +
+								"<td>" + "<button onclick='updateexpressdatabase(" + result[i].id + ")' >更新</button>" + "</td>" 
+								+ "<td>" + "<button onclick='deleteexpress(" + result[i].id + ")' >删除</button>" + "</td>"+
+								"</tr>");
+							$('#express_info-table tbody').append(temp);
+
+						}
+
+					},
+					error: function(result) {
+						alert("error");
+					}
+
+				});
+			}
+
+			function updateexpressdatabase(id) {
+
+				$.ajax({
+					type: "POST", //方法类型
+					dataType: "text", //预期服务器返回的数据类型
+					url: "/Dormitory/express", //url
+					data: {
+						"way": "update",
+						"id": $("#update-id").val(),
+						"stu_id": $("#update-stu_id").val(),
+						"stu_name": $("#update-stu_name").val(),
+						"phone_number": $("#update-phone_number").val(),
+						"arrival_datetime": $("#update-arrival_datetime").val(),
+						"is_get": $("#update-is_get").val()
+					},
+					success: function(result) {
+						if(result == "success") {
+							alert("更新成功！");
+						} else {
+							alert("更新失败！");
+						}
+						singleselectexpress(id);
+					},
+					error: function(result) {
+						alert("更新失败！" + "原因：" + result);
+						singleselectexpress(id);
+					}
+				});
+			}
+
+			//删除快件信息deleteexpress
+						function deleteexpress(id) {
+
+				$.ajax({
+					type: "POST", //方法类型
+					dataType: "text", //预期服务器返回的数据类型
+					url: "/Dormitory/express", //url
+					data: {
+						"way": "delete",
+						"id": id
+					},
+					success: function(result) {
+						if(result == "success") {
+							alert("删除成功！");
+							selectexpressall();
+						} else {
+							alert("删除失败！");
+							selectexpressall();
+						}
+					},
+					error: function(result) {
+						alert("删除失败！" + "原因：" + result);
+						selectexpressall();
+					}
+				});
+			}
+
+		</script>
+	</head>
+
+	<body>
+
+		<div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container-fluid">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
+					<a class="brand" href="#"><script>document.write(getCookie("identity"))</script></a>
+					<div class="btn-group pull-right">
+						<a class="btn" href="#"><i class="icon-user"></i> <script>document.write(getCookie("identity"))</script></a>
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="./login.html">登出</a>
+							</li>
+						</ul>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span2">
+					<div class="well sidebar-nav">
+						<ul class="nav-stacked nav-tabs" id="myTab">
+							<label>学生信息</label>
+							<li class="active" style="line-height:3">
+								<a href="#select-student_info" data-toggle="tab">查询学生信息</a>
+							</li>
+
+							<label>快件信息</label>
+							<li style="line-height:3">
+								<a href="#select-express_info" data-toggle="tab">查询快件信息</a>
+							</li>
+							<li style="line-height:3">
+								<a href="#insert-express_info" data-toggle="tab">发布快件信息</a>
+							</li>
+
+							<label>报修信息</label>
+							<li style="line-height:3">
+								<a href="#select-repairs_info" data-toggle="tab">查询报修信息</a>
+							</li>
+							<li style="line-height:3">
+								<a href="#insert-repairs_info" data-toggle="tab">发布报修信息</a>
+							</li>
+
+							<label>夜归信息</label>
+							<li style="line-height:3">
+								<a href="#select-night_back_info" data-toggle="tab">查询夜归信息</a>
+							</li>
+							<li style="line-height:3">
+								<a href="#insert-night_back_info" data-toggle="tab">发布夜归信息</a>
+							</li>
+
+							<label>离返校信息</label>
+							<li style="line-height:3">
+								<a href="#select-come_back_info" data-toggle="tab">查询离返校信息</a>
+							</li>
+
+							<label>密码信息</label>
+							<li style="line-height:3">
+								<a href="#change_password" data-toggle="tab">修改密码</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="span10">
+					<div class="row-fluid">
+						<div class="page-header">
+							<h1>
+								<script>document.write(getCookie("login_id"))</script>
+							</h1>
+							<h1>管理员你好！</h1>
+
+						</div>
+						<div class="tab-content">
+							<!--查询学生信息页面-->
+
+							<div class="tab-pane fade in active" id="select-student_info">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label class="col-sm-1 control-label" for="student-classname">班级选择列表</label>
+										<div class="col-sm-3">
+											<select id="student-classname" class="form-control">
+												<option value="stu_id" selected="selected">不限</option>
+												<option value="1">1班</option>
+												<option value="2">2班</option>
+												<option value="3">3班</option>
+												<option value="4">4班</option>
+												<option value="5">5班</option>
+												<option value="6">6班</option>
+											</select>
+										</div>
+
+										<label class="col-sm-1 control-label" for="student-major">专业系别选择列表</label>
+										<div class="col-sm-3">
+											<select id="student-major" class="form-control">
+												<option value="major" selected="selected">不限</option>
+												<option value="计算机系">计算机系</option>
+												<option value="音乐系">音乐系</option>
+												<option value="机械系">机械系</option>
+												<option value="建筑系">建筑系</option>
+											</select>
+										</div>
+
+										<label class="col-sm-1 control-label" for="student-grade">年级选择列表</label>
+										<div class="col-sm-3">
+											<select id="student-grade" class="form-control">
+												<option value="grade" selected="selected">不限</option>
+												<option value="2015">2015</option>
+												<option value="2016">2016</option>
+												<option value="2017">2017</option>
+												<option value="2018">2018</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<input type="button" onclick="selectstudentsingle()" class="btn btn-primary col-sm-offset-2 col-sm-3" value="按条件查询学生信息"></input>
+										<input type="button" onclick="selectstudentall()" class="btn btn-success col-sm-offset-2 col-sm-3" value="查询所有学生信息"></input>
+									</div>
+								</form>
+
+								<table id="student_info-table" class="table table-striped table-bordered table-condensed">
+									<thead>
+										<tr>
+											<th>学号</th>
+											<th>姓名</th>
+											<th>密码</th>
+											<th>生日</th>
+											<th>系别</th>
+											<th>年级</th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+
+								</table>
+
+							</div>
+							<!--结束-->
+
+							<!--查询快件信息页面-->
+							<div class="tab-pane fade" id="select-express_info">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label class="col-sm-1 control-label" for="express-classname">班级选择列表</label>
+										<div class="col-sm-3">
+											<select id="express-classname" class="form-control">
+												<option value="stu_id" selected="selected">不限</option>
+												<option value="1">1班</option>
+												<option value="2">2班</option>
+												<option value="3">3班</option>
+												<option value="4">4班</option>
+												<option value="5">5班</option>
+												<option value="6">6班</option>
+											</select>
+										</div>
+
+										<label class="col-sm-1 control-label" for="express-major">专业系别选择列表</label>
+										<div class="col-sm-3">
+											<select id="express-major" class="form-control">
+												<option value="major" selected="selected">不限</option>
+												<option value="计算机系">计算机系</option>
+												<option value="音乐系">音乐系</option>
+												<option value="机械系">机械系</option>
+												<option value="建筑系">建筑系</option>
+											</select>
+										</div>
+
+										<label class="col-sm-1 control-label" for="express-grade">年级选择列表</label>
+										<div class="col-sm-3">
+											<select id="express-grade" class="form-control">
+												<option value="grade" selected="selected">不限</option>
+												<option value="2015">2015</option>
+												<option value="2016">2016</option>
+												<option value="2017">2017</option>
+												<option value="2018">2018</option>
+											</select>
+										</div>
+									
+										<label class="col-sm-1 control-label" for="express-grade">按学生名模糊查询快件信息</label>
+										<div class="col-sm-3">
+										<input type="text" id="selectexpress-name" class="form-control" placeholder="请输入学生的名字"/>
+										<input type="button" onclick="selectexpressbyname()" class="btn btn-success" value="按学生名模糊查询快件信息"></input>
+										
+										</div>
+									</div>
+									<div class="form-group">
+										<input type="button" onclick="selectexpresssingle()" class="btn btn-primary col-sm-offset-2 col-sm-3" value="按条件查询快件信息"></input>
+										<input type="button" onclick="selectexpressall()" class="btn btn-success" value="查询所有快件信息"></input>
+										
+									</div>
+								</form>
+
+								<table id="express_info-table" class="table table-striped table-bordered table-condensed">
+									<thead>
+										<tr>
+											<th>编号</th>
+											<th>学号</th>
+											<th>姓名</th>
+											<th>电话号码</th>
+											<th>发货日期或到达日期</th>
+											<th>状态</th>
+											<th>操作1</th>
+											<th>操作2</th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+
+								</table>
+
+							</div>
+							<!--结束-->
+
+							<!--查询报修信息页面-->
+							<div class="tab-pane fade" id="select-repairs_info">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<input type="button" onclick="selectrepairsall()" class="btn btn-success" value="查询报修信息"></input>
+									</div>
+								</form>
+
+								<table id="repairs_info-table" class="table table-striped table-bordered table-condensed">
+									<thead>
+										<tr>
+											<th>编号</th>
+											<th>学号</th>
+											<th>姓名</th>
+											<th>宿舍号码</th>
+											<th>电话号码</th>
+											<th>报修时间</th>
+											<th>报修原因</th>
+
+										</tr>
+									</thead>
+									<tbody></tbody>
+
+								</table>
+
+							</div>
+							<!--结束-->
+
+							<!--查询晚归信息页面-->
+							<div class="tab-pane fade" id="select-night_back_info">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<input type="button" onclick="selectnightall()" class="btn btn-success" value="查询夜归信息"></input>
+									</div>
+								</form>
+
+								<table id="night_back_info-table" class="table table-striped table-bordered table-condensed">
+									<thead>
+										<tr>
+											<th>编号</th>
+											<th>学号</th>
+											<th>姓名</th>
+											<th>夜归时间</th>
+
+										</tr>
+									</thead>
+									<tbody></tbody>
+
+								</table>
+
+							</div>
+							<!--结束-->
+
+							<!--查询返校信息页面-->
+							<div class="tab-pane fade" id="select-come_back_info">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<input type="button" onclick="selectcomeall()" class="btn btn-success" value="查询返校信息"></input>
+									</div>
+								</form>
+
+								<table id="come_back_info-table" class="table table-striped table-bordered table-condensed">
+									<thead>
+										<tr>
+											<th>编号</th>
+											<th>学号</th>
+											<th>姓名</th>
+											<th>状态</th>
+											<th>发生时间</th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+
+								</table>
+
+							</div>
+							<!--结束-->
+
+							<!--发布快件信息-->
+							<div class="tab-pane fade" id="insert-express_info">
+								<!--insert-->
+								<form method="post" action="insert" name="insert-express_info-form" id="insert-express_info-form" role="form">
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的学号：</label>
+										<div class="col-sm-10">
+											<input type="text" name="stu_id" class="form-control" placeholder="请输入学生的学号" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的姓名：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="stu_name" class="form-control" placeholder="请输入学生的姓名" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的电话号码：</label>
+										<div class="col-sm-10">
+											<input type="text" name="phone_number" class="form-control" placeholder="请输入学生的电话号码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请选择学生的快件状态：</label>
+										<div class="col-sm-10">
+											<select name="is_get" class="form-control">
+												<option value="1" selected="selected">已到达</option>
+												<option value="0">未到达</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生快件的发货日期或到达日期：</label>
+										<div class="col-sm-10">
+											<input type="date" name="arrival_datetime" class="form-control" placeholder="请输入学生快件的发货日期或到达日期" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<input type="button" class="btn btn-default" onclick="insertexpress()" value="插入"></input>
+											<button type="reset" class="btn btn-default">重置</button>
+										</div>
+									</div>
+
+								</form>
+							</div>
+							<!--结束-->
+
+							<!--发布夜归信息-->
+							<div class="tab-pane fade" id="insert-night_back_info">
+								<!--insert-->
+								<form method="post" action="insert" name="insert-night_back_info-form" id="insert-night_back_info-form" role="form">
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的学号：</label>
+										<div class="col-sm-10">
+											<input type="text" name="stu_id" class="form-control" placeholder="请输入学生的学号" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的姓名：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="stu_name" class="form-control" placeholder="请输入学生的姓名" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生晚归日期：</label>
+										<div class="col-sm-10">
+											<input type="date" name="night_back_datetime" class="form-control" placeholder="请请输入学生晚归日期" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<input type="button" class="btn btn-default" onclick="insertnight()" value="插入"></input>
+											<button type="reset" class="btn btn-default">重置</button>
+										</div>
+									</div>
+
+								</form>
+							</div>
+							<!--结束-->
+
+							<!--发布报修信息-->
+							<div class="tab-pane fade" id="insert-repairs_info">
+								<!--insert-->
+								<form method="post" action="insert" name="insert-repairs_info-form" id="insert-repairs_info-form" role="form">
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的学号：</label>
+										<div class="col-sm-10">
+											<input type="text" name="stu_id" class="form-control" placeholder="请输入学生的学号" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的姓名：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="stu_name" class="form-control" placeholder="请输入学生的姓名" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的宿舍号码：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="dormitory_num" class="form-control" placeholder="请输入学生的宿舍号码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的电话号码：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="phone_number" class="form-control" placeholder="请输入学生的电话号码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生报修日期：</label>
+										<div class="col-sm-10">
+											<input type="date" name="report_datetime" class="form-control" placeholder="请请输入学生报修日期" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入学生的报修原因：</label>
+										<div class="col-sm-10">
+
+											<input type="text" name="reason" class="form-control" placeholder="请输入学生的报修原因" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<input type="button" class="btn btn-default" onclick="insertrepairs()" value="插入"></input>
+											<button type="reset" class="btn btn-default">重置</button>
+										</div>
+									</div>
+
+								</form>
+							</div>
+							<!--结束-->
+
+							<!--更改密码-->
+							<div class="tab-pane fade" id="change_password">
+								<!--insert-->
+								<form method="post" action="insert" name="change_password-form" id="change_password-form" role="form">
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入原密码：</label>
+										<div class="col-sm-10">
+											<input type="password" id="originpassword" name="originpassword" class="form-control" placeholder="请输入原密码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请输入新密码：</label>
+										<div class="col-sm-10">
+											<input type="password" id="firstpassword" name="firstpassword" class="form-control" placeholder="请输入新密码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" style="color:white">请再次输入新密码：</label>
+										<div class="col-sm-10">
+
+											<input type="password" id="secondpassword" name="secondpassword" class="form-control" placeholder="请再次输入新密码" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<input type="hidden" name="target" value="admin_info" />
+											<input type="button" class="btn btn-default" onclick="change_password()" value="更改密码"></input>
+											<button type="reset" class="btn btn-default">重置</button>
+										</div>
+									</div>
+
+								</form>
+							</div>
+							<!--结束-->
+						</div>
+
+					</div>
+
+				</div>
+
+				<script src="js/jquery.js"></script>
+				<script src="js/bootstrap.min.js"></script>
+				<script>
+					$(document).ready(function() {
+						$('.dropdown-menu li a').hover(
+							function() {
+								$(this).children('i').addClass('icon-white');
+							},
+							function() {
+								$(this).children('i').removeClass('icon-white');
+							});
+
+						if($(window).width() > 760) {
+							$('tr.list-users td div ul').addClass('pull-right');
+						}
+					});
+				</script>
+
+	</body>
+
+</html>

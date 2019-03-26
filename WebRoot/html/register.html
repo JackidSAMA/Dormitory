@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+		<link href="../style/bg.css" rel="stylesheet">
+		<link href="../style/site.css" rel="stylesheet">
+
+		<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="./util.js"></script>
+
+		<script>
+			
+			//		检查插入信息表单
+			function formcheck() {
+				for(var i = 0; i < document.getElementById("myform").elements.length - 1; i++) {
+					if(document.getElementById("myform").elements[i].value == "") {
+						alert("当前表单不能有空项");
+						document.getElementById("myform").elements[i].focus();
+						return false;
+					}
+				}
+				return true;
+
+			}
+			//插入信息
+			function insert() {
+				if(!formcheck()) {
+					return;
+				}
+				if($('#firstpassword').val() == $('#secondpassword').val()) {
+					$.ajax({
+						type: "POST", //方法类型
+						dataType: "text", //预期服务器返回的数据类型
+						url: "/Dormitory/istudent", //url
+						data: $("#myform").serialize(),
+						success: function(result) {
+							alert(result);
+							document.getElementById('myform').reset();
+						},
+						error: function() {
+							alert("非法输入！");
+							document.getElementById('myform').reset();
+						}
+					});
+				} else {
+					alert("两次输入的新密码不一致");
+					return;
+				}
+			}
+		</script>
+		<title>注册页面</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-offset-3 col-md-6">
+					<form class="form-horizontal" id="myform">
+						<span class="heading">新用户注册</span>
+						<div class="form-group">
+							<input type="text" class="form-control" id="stu_id" name="stu_id" placeholder="请输入学号">
+							<span ></span>
+							<i class="fa fa-user"></i>
+						</div>
+
+						<div class="form-group">
+							<input type="text" class="form-control" id="stu_name" name="stu_name" placeholder="请输入姓名">
+							<span ></span>
+							<i class="fa fa-user"></i>
+						</div>
+
+						<div class="form-group">
+							<input type="date" class="form-control" id="birthday" name="birthday" placeholder="请输入出生年月日">
+							<span ></span>
+							<i class="fa fa-user"></i>
+						</div>
+
+						<div class="form-group">
+							<select class="form-control" id="major" name="major">
+								<option selected="selected" value="计算机系">计算机系</option>
+								<option value="音乐系">音乐系</option>
+								<option value="机械系">机械系</option>
+								<option value="建筑系">建筑系</option>
+							</select>
+							<!--<input type="text" class="form-control" id="major" name="major" placeholder="请输入专业">-->
+							<span ></span>
+							<i class="fa fa-user"></i>
+						</div>
+
+						<div class="form-group">
+								<select class="form-control" id="grade" name="grade">
+								<option selected="selected" value="2015">2015</option>
+								<option value="2016">2016</option>
+								<option value="2017">2017</option>
+								<option value="2018">2018</option>
+							</select>
+							<!--<input type="text" class="form-control" id="grade" name="grade" placeholder="请输入年级">-->
+							<span ></span>
+							<i class="fa fa-user"></i>
+						</div>
+
+						<div class="form-group">
+							<input type="password" class="form-control" id="firstpassword" name="firstpassword" placeholder="请输入您的密码">
+							<span id="pas1Tip"></span>
+							<i class="fa fa-lock"></i>
+							<a href="#" class="fa fa-question-circle"></a>
+						</div>
+						<div class="form-group">
+							<input type="password" class="form-control" id="secondpassword" name="secondpassword" placeholder="请确认您的密码">
+							<span ></span>
+						</div>
+						<div class="form-group">
+							<label class="label-warning">用户类型：学生</label>
+						</div>
+
+						<div class="form-group">
+							<input type="button" class="btn-primary" onclick="insert()" value="提交！" />
+						</div>
+
+						<div class="form-group">
+							<a href='./login.html'>返回登陆 </a>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+		
+		
+
+		
+	</body>
+
+</html>
